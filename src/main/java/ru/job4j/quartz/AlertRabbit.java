@@ -5,12 +5,8 @@ import org.quartz.impl.StdSchedulerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.List;
+import java.sql.*;
+import java.time.LocalDateTime;
 import java.util.Properties;
 
 import static org.quartz.JobBuilder.*;
@@ -28,9 +24,7 @@ public class AlertRabbit {
             Scheduler scheduler = StdSchedulerFactory.getDefaultScheduler();
             scheduler.start();
             JobDataMap data = new JobDataMap();
-            List<LocalTime> time = new ArrayList<>();
-            data.put("connect", connection);
-            data.put("time", time);
+            data.put("time", initConnection(getProperties()));
             JobDetail job = newJob(Rabbit.class)
                     .usingJobData(data)
                     .build();
@@ -53,18 +47,28 @@ public class AlertRabbit {
         Properties config = new Properties();
         try (InputStream in = AlertRabbit.class.getClassLoader().getResourceAsStream("rabbit.properties")) {
             config.load(in);
-            Class.forName(config.getProperty("driver-class-name"));
-            connection = DriverManager.getConnection(
-                    config.getProperty("url"),
-                    config.getProperty("username"),
-                    config.getProperty("password")
-            );
-        } catch (IOException | ClassNotFoundException e) {
+        } catch (IOException e) {
             e.printStackTrace();
+        }
+        return config;
+    }
+
+    public static Timestamp initConnection(Properties config) throws SQLException {
+        String url = config.getProperty("url");
+        String username = config.getProperty("username");
+        String password = config.getProperty("password");
+        connection = DriverManager.getConnection(url, username, password);
+        Timestamp timestamp = Timestamp.valueOf(LocalDateTime.now());
+        createTable();
+        return timestamp;
+    }
+
+    private static void createTable() {
+        try (Statement statement = connection.createStatement()) {
+            statement.execute("CREATE TABLE rabbit (id SERIAL PRIMARY KEY, created_date TIMESTAMP)");
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-        return config;
     }
 
     public static class Rabbit implements Job {
@@ -73,9 +77,7 @@ public class AlertRabbit {
 
         @Override
         public void execute(JobExecutionContext context) {
-            System.out.println("Rabbit runs here ...");
-            List<LocalTime> time = (List<LocalTime>) context.getJobDetail().getJobDataMap().get("time");
-            time.add(LocalTime.now());
+            context.getJobDetail().getJobDataMap().get("time");
         }
     }
 }
