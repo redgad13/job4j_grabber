@@ -16,6 +16,7 @@ import static org.quartz.SimpleScheduleBuilder.*;
 public class AlertRabbit {
 
     private static Connection connection;
+    private static Timestamp time;
 
     public static void main(String[] args) {
         Properties properties = getProperties();
@@ -53,19 +54,22 @@ public class AlertRabbit {
         return config;
     }
 
-    public static Timestamp initConnection(Properties config) throws SQLException {
+    public static Timestamp initConnection(Properties config) throws ClassNotFoundException, SQLException {
+        Class.forName(config.getProperty("driver-class-name"));
         String url = config.getProperty("url");
         String username = config.getProperty("username");
         String password = config.getProperty("password");
         connection = DriverManager.getConnection(url, username, password);
-        Timestamp timestamp = Timestamp.valueOf(LocalDateTime.now());
+        time = Timestamp.valueOf(LocalDateTime.now());
         createTable();
-        return timestamp;
+        return time;
     }
 
     private static void createTable() {
         try (Statement statement = connection.createStatement()) {
-            statement.execute("CREATE TABLE rabbit (id SERIAL PRIMARY KEY, created_date TIMESTAMP)");
+            statement.execute("CREATE TABLE IF NOT EXISTS rabbit (id SERIAL PRIMARY KEY, created_date TIMESTAMP)");
+            statement.execute(String.format("INSERT INTO rabbit (created_date) " +
+                    "VALUES (%s)", time));
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
