@@ -26,16 +26,9 @@ public class AlertRabbit {
             scheduler.start();
             JobDataMap data = new JobDataMap();
             data.put("time", initConnection(getProperties()));
-            JobDetail job = newJob(Rabbit.class)
-                    .usingJobData(data)
-                    .build();
-            SimpleScheduleBuilder times = simpleSchedule()
-                    .withIntervalInSeconds(Integer.parseInt(interval))
-                    .repeatForever();
-            Trigger trigger = newTrigger()
-                    .startNow()
-                    .withSchedule(times)
-                    .build();
+            JobDetail job = newJob(Rabbit.class).usingJobData(data).build();
+            SimpleScheduleBuilder times = simpleSchedule().withIntervalInSeconds(Integer.parseInt(interval)).repeatForever();
+            Trigger trigger = newTrigger().startNow().withSchedule(times).build();
             scheduler.scheduleJob(job, trigger);
             Thread.sleep(10000);
             scheduler.shutdown();
@@ -68,8 +61,7 @@ public class AlertRabbit {
     private static void createTable() {
         try (Statement statement = connection.createStatement()) {
             statement.execute("CREATE TABLE IF NOT EXISTS rabbit (id SERIAL PRIMARY KEY, created_date TIMESTAMP)");
-            statement.execute(String.format("INSERT INTO rabbit (created_date) " +
-                    "VALUES (%s)", time));
+            statement.execute(String.format("INSERT INTO rabbit (created_date) " + "VALUES (%s)", time));
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
