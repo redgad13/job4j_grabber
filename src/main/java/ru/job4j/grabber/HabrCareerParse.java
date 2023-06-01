@@ -23,8 +23,8 @@ public class HabrCareerParse {
             Element linkElement = titleElement.child(0);
             Element date = row.select(".vacancy-card__date").first();
             String vacancyName = titleElement.text();
-            String exactDate = date.text();
             String link = String.format("%s%s", SOURCE_LINK, linkElement.attr("href"));
+            String exactDate = date.child(0).attr("datetime");
             System.out.printf("%s %s %s%n", vacancyName, link, exactDate);
         });
     }
