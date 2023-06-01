@@ -6,7 +6,6 @@ import org.quartz.impl.StdSchedulerFactory;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.*;
-import java.time.LocalDateTime;
 import java.util.Properties;
 
 import static org.quartz.JobBuilder.*;
@@ -23,8 +22,9 @@ public class AlertRabbit {
             String interval = properties.getProperty("rabbit.interval");
             Scheduler scheduler = StdSchedulerFactory.getDefaultScheduler();
             scheduler.start();
+            connection = initConnection(getProperties());
             JobDataMap data = new JobDataMap();
-            data.put("time", initConnection(getProperties()));
+            data.put("time", connection);
             JobDetail job = newJob(Rabbit.class).usingJobData(data).build();
             SimpleScheduleBuilder times = simpleSchedule().withIntervalInSeconds(Integer.parseInt(interval)).repeatForever();
             Trigger trigger = newTrigger().startNow().withSchedule(times).build();
@@ -46,21 +46,19 @@ public class AlertRabbit {
         return config;
     }
 
-    public static Timestamp initConnection(Properties config) throws ClassNotFoundException, SQLException {
+    public static Connection initConnection(Properties config) throws ClassNotFoundException, SQLException {
         Class.forName(config.getProperty("driver-class-name"));
         String url = config.getProperty("url");
         String username = config.getProperty("username");
         String password = config.getProperty("password");
         connection = DriverManager.getConnection(url, username, password);
-        Timestamp time = Timestamp.valueOf(LocalDateTime.now());
         createTable();
-        return time;
+        return connection;
     }
 
     private static void createTable() {
         try (Statement statement = connection.createStatement()) {
             statement.execute("CREATE TABLE IF NOT EXISTS rabbit (id SERIAL PRIMARY KEY, created_date TIMESTAMP)");
-            statement.execute("INSERT INTO rabbit (created_date) VALUES (CURRENT_TIMESTAMP)");
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -72,7 +70,11 @@ public class AlertRabbit {
 
         @Override
         public void execute(JobExecutionContext context) {
-            context.getJobDetail().getJobDataMap().get("time");
+            try (Statement statement = connection.createStatement()) {
+                statement.execute("INSERT INTO rabbit (created_date) VALUES (CURRENT_TIMESTAMP)");
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 }
