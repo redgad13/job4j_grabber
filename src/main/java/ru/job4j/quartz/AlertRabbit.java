@@ -13,16 +13,13 @@ import static org.quartz.TriggerBuilder.*;
 import static org.quartz.SimpleScheduleBuilder.*;
 
 public class AlertRabbit {
-
-    private static Connection connection;
-
     public static void main(String[] args) {
         Properties properties = getProperties();
         try {
             String interval = properties.getProperty("rabbit.interval");
             Scheduler scheduler = StdSchedulerFactory.getDefaultScheduler();
             scheduler.start();
-            connection = initConnection(getProperties());
+            Connection connection = initConnection(getProperties());
             JobDataMap data = new JobDataMap();
             data.put("time", connection);
             JobDetail job = newJob(Rabbit.class).usingJobData(data).build();
@@ -51,12 +48,12 @@ public class AlertRabbit {
         String url = config.getProperty("url");
         String username = config.getProperty("username");
         String password = config.getProperty("password");
-        connection = DriverManager.getConnection(url, username, password);
-        createTable();
+        Connection connection = DriverManager.getConnection(url, username, password);
+        createTable(connection);
         return connection;
     }
 
-    private static void createTable() {
+    private static void createTable(Connection connection) {
         try (Statement statement = connection.createStatement()) {
             statement.execute("CREATE TABLE IF NOT EXISTS rabbit (id SERIAL PRIMARY KEY, created_date TIMESTAMP)");
         } catch (SQLException e) {
@@ -70,11 +67,13 @@ public class AlertRabbit {
 
         @Override
         public void execute(JobExecutionContext context) {
-            try (Statement statement = connection.createStatement()) {
+            Connection c = (Connection) context.getJobDetail().getJobDataMap().get("time");
+            try (Statement statement = c.createStatement()) {
                 statement.execute("INSERT INTO rabbit (created_date) VALUES (CURRENT_TIMESTAMP)");
             } catch (SQLException e) {
                 throw new RuntimeException(e);
             }
+
         }
     }
 }
