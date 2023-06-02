@@ -21,7 +21,7 @@ public class AlertRabbit {
             scheduler.start();
             Connection connection = initConnection(getProperties());
             JobDataMap data = new JobDataMap();
-            data.put("time", connection);
+            data.put("connection", connection);
             JobDetail job = newJob(Rabbit.class).usingJobData(data).build();
             SimpleScheduleBuilder times = simpleSchedule().withIntervalInSeconds(Integer.parseInt(interval)).repeatForever();
             Trigger trigger = newTrigger().startNow().withSchedule(times).build();
@@ -67,7 +67,7 @@ public class AlertRabbit {
 
         @Override
         public void execute(JobExecutionContext context) {
-            try (Connection c = (Connection) context.getJobDetail().getJobDataMap().get("time")) {
+            try (Connection c = (Connection) context.getJobDetail().getJobDataMap().get("connection")) {
                 Statement statement = c.createStatement();
                 statement.execute("INSERT INTO rabbit (created_date) VALUES (CURRENT_TIMESTAMP)");
             } catch (SQLException e) {
