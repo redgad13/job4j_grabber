@@ -67,13 +67,12 @@ public class AlertRabbit {
 
         @Override
         public void execute(JobExecutionContext context) {
-            Connection c = (Connection) context.getJobDetail().getJobDataMap().get("time");
-            try (Statement statement = c.createStatement()) {
+            try (Connection c = (Connection) context.getJobDetail().getJobDataMap().get("time")) {
+                Statement statement = c.createStatement();
                 statement.execute("INSERT INTO rabbit (created_date) VALUES (CURRENT_TIMESTAMP)");
             } catch (SQLException e) {
                 throw new RuntimeException(e);
             }
-
         }
     }
 }
