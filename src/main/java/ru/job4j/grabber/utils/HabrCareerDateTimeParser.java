@@ -4,7 +4,7 @@ import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 
-public class HabrCareerDateTimeParser implements DateTimeParser{
+public class HabrCareerDateTimeParser implements DateTimeParser {
     @Override
     public LocalDateTime parse(String parse) {
         OffsetDateTime current = OffsetDateTime.parse(parse);
