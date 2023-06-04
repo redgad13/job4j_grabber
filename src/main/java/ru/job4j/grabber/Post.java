@@ -19,12 +19,12 @@ public class Post {
             return false;
         }
         Post post = (Post) o;
-        return id == post.id;
+        return created == post.created;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id);
+        return Objects.hash(created);
     }
 
     @Override
