@@ -23,6 +23,7 @@ public class HabrCareerParse {
             getPage(connection);
             builder = new StringBuilder(PAGE_LINK).append("?page=").append(i);
         }
+
     }
 
     public static void getPage(Connection connection) throws IOException {
@@ -39,5 +40,12 @@ public class HabrCareerParse {
             String formattedTime = parser.parse(exactDate).toString();
             System.out.printf("%s %s %s%n", vacancyName, link, formattedTime);
         });
+    }
+
+    private String retrieveDescription(String link) throws IOException {
+        Connection connection = Jsoup.connect(link);
+        Document document = connection.get();
+        Element description = document.select(".faded-content__container").first();
+        return description.text();
     }
 }
