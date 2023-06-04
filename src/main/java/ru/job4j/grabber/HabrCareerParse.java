@@ -18,7 +18,7 @@ public class HabrCareerParse {
     public static void main(String[] args) throws IOException {
         StringBuilder builder = new StringBuilder(PAGE_LINK);
         Connection connection;
-        for (int i = 1; i < 6; i++) {
+        for (int i = 2; i < 6; i++) {
             connection = Jsoup.connect(builder.toString());
             getPage(connection);
             builder = new StringBuilder(PAGE_LINK).append("?page=").append(i);
