@@ -19,12 +19,12 @@ public class Post {
             return false;
         }
         Post post = (Post) o;
-        return created == post.created;
+        return id == post.id && Objects.equals(link, post.link);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(created);
+        return Objects.hash(id, link);
     }
 
     @Override
