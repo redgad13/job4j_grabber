@@ -40,11 +40,11 @@ public class HabrCareerParse {
             DateTimeParser parser = new HabrCareerDateTimeParser();
             String formattedTime = parser.parse(exactDate).toString();
             HabrCareerParse habrCareerParse = new HabrCareerParse();
-            String description;
+            String description = null;
             try {
                 description = habrCareerParse.retrieveDescription(link);
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                e.printStackTrace();
             }
             System.out.printf("%s %s %s%n", vacancyName, link, formattedTime);
             System.out.println(description);
