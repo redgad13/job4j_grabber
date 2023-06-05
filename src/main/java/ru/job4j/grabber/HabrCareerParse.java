@@ -16,6 +16,13 @@ public class HabrCareerParse {
 
     private static final String PAGE_LINK = String.format("%s/vacancies/java_developer", SOURCE_LINK);
 
+    private final DateTimeParser dateTimeParser;
+
+    public HabrCareerParse(DateTimeParser dateTimeParser) {
+        this.dateTimeParser = dateTimeParser;
+    }
+
+
     public static void main(String[] args) throws IOException {
         StringBuilder builder = new StringBuilder(PAGE_LINK);
         Connection connection;
@@ -39,7 +46,7 @@ public class HabrCareerParse {
             String exactDate = date.child(0).attr("datetime");
             DateTimeParser parser = new HabrCareerDateTimeParser();
             String formattedTime = parser.parse(exactDate).toString();
-            HabrCareerParse habrCareerParse = new HabrCareerParse();
+            HabrCareerParse habrCareerParse = new HabrCareerParse(new HabrCareerDateTimeParser());
             String description = null;
             try {
                 description = habrCareerParse.retrieveDescription(link);
