@@ -22,7 +22,6 @@ public class HabrCareerParse {
         this.dateTimeParser = dateTimeParser;
     }
 
-
     public static void main(String[] args) throws IOException {
         StringBuilder builder = new StringBuilder(PAGE_LINK);
         Connection connection;
