@@ -9,8 +9,10 @@ import ru.job4j.grabber.utils.DateTimeParser;
 import ru.job4j.grabber.utils.HabrCareerDateTimeParser;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
-public class HabrCareerParse {
+public class HabrCareerParse implements Parse {
 
     private static final String SOURCE_LINK = "https://career.habr.com";
 
@@ -22,12 +24,41 @@ public class HabrCareerParse {
         this.dateTimeParser = dateTimeParser;
     }
 
+    @Override
+    public List<Post> list(String link) throws IOException {
+        List<Post> posts = new ArrayList<>();
+        Connection connection = Jsoup.connect(link);
+        Document document = connection.get();
+        Elements rows = document.select(".vacancy-card__inner");
+        for (int i = 0; i < rows.size(); i++) {
+            Element titleElement = rows.get(i).select(".vacancy-card__title").first();
+            Element linkElement = titleElement.child(0);
+            Element date = rows.get(i).select(".vacancy-card__date").first();
+            String vacancyName = titleElement.text();
+            String innerLink = String.format("%s%s", SOURCE_LINK, linkElement.attr("href"));
+            String exactDate = date.child(0).attr("datetime");
+            DateTimeParser parser = new HabrCareerDateTimeParser();
+            HabrCareerParse habrCareerParse = new HabrCareerParse(new HabrCareerDateTimeParser());
+            String description;
+            try {
+                description = habrCareerParse.retrieveDescription(innerLink);
+                Post post = new Post(i, vacancyName, innerLink, description, parser.parse(exactDate));
+                posts.add(post);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return posts;
+    }
+
     public static void main(String[] args) throws IOException {
         StringBuilder builder = new StringBuilder(PAGE_LINK);
         Connection connection;
         for (int i = 2; i < 6; i++) {
             connection = Jsoup.connect(builder.toString());
             getPage(connection);
+            HabrCareerParse habrCareerParse = new HabrCareerParse(new HabrCareerDateTimeParser());
+            habrCareerParse.list(PAGE_LINK);
             builder = new StringBuilder(PAGE_LINK).append("?page=").append(i);
         }
 
