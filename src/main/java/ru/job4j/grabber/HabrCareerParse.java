@@ -12,7 +12,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class HabrCareerParse implements Parse, Store {
+public class HabrCareerParse implements Parse {
 
     private static final String SOURCE_LINK = "https://career.habr.com";
 
@@ -49,21 +49,6 @@ public class HabrCareerParse implements Parse, Store {
             }
         }
         return posts;
-    }
-
-    @Override
-    public void save(Post post) {
-
-    }
-
-    @Override
-    public List<Post> getAll() {
-        return null;
-    }
-
-    @Override
-    public Post findBy(int id) {
-        return null;
     }
 
     public static void main(String[] args) throws IOException {
