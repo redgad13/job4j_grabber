@@ -54,10 +54,10 @@ public class HabrCareerParse implements Parse {
     public static void main(String[] args) throws IOException {
         StringBuilder builder = new StringBuilder(PAGE_LINK);
         HabrCareerParse habrCareerParse = new HabrCareerParse(new HabrCareerDateTimeParser());
-        List <Post> posts = new ArrayList<>();
+        List<Post> posts = new ArrayList<>();
         for (int i = 2; i < 7; i++) {
-           posts.addAll(habrCareerParse.list(builder.toString()));
-           builder.append("?page=").append(i);
+            posts.addAll(habrCareerParse.list(builder.toString()));
+            builder.append("?page=").append(i);
         }
         for (Post post : posts) {
             System.out.println(post);
