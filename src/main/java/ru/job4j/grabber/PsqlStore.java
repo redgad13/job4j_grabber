@@ -3,6 +3,7 @@ package ru.job4j.grabber;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.*;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -19,7 +20,7 @@ public class PsqlStore implements Store {
         }
         cnn = DriverManager.getConnection(
                 cfg.getProperty("url"),
-                cfg.getProperty("user"),
+                cfg.getProperty("username"),
                 cfg.getProperty("password")
         );
     }
@@ -89,6 +90,9 @@ public class PsqlStore implements Store {
             Properties config = new Properties();
             config.load(in);
             PsqlStore psqlStore = new PsqlStore(config);
+            psqlStore.save(new Post(1, "first", "first link", "first desc", LocalDateTime.now()));
+            psqlStore.save(new Post(2, "second", "second link", "second desc", LocalDateTime.now()));
+            psqlStore.save(new Post(3, "third", "third link", "third desc", LocalDateTime.now()));
             List<Post> all = psqlStore.getAll();
             for (Post post : all) {
                 System.out.println(post);
