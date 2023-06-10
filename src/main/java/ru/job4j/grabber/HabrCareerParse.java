@@ -9,7 +9,6 @@ import ru.job4j.grabber.utils.DateTimeParser;
 import ru.job4j.grabber.utils.HabrCareerDateTimeParser;
 
 import java.io.IOException;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,19 +33,7 @@ public class HabrCareerParse implements Parse {
         Document document = connection.get();
         Elements rows = document.select(".vacancy-card__inner");
         for (Element row : rows) {
-            Element titleElement = row.select(".vacancy-card__title").first();
-            Element linkElement = titleElement.child(0);
-            Element date = row.select(".vacancy-card__date").first();
-            String vacancyName = titleElement.text();
-            String innerLink = String.format("%s%s", SOURCE_LINK, linkElement.attr("href"));
-            String exactDate = date.child(0).attr("datetime");
-            String description;
-            try {
-                description = this.retrieveDescription(innerLink);
-                posts.add(createPost(postID++, vacancyName, innerLink, description, dateTimeParser.parse(exactDate)));
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            posts.add(createPost(row));
         }
         return posts;
     }
@@ -71,7 +58,21 @@ public class HabrCareerParse implements Parse {
         return description.text();
     }
 
-    private Post createPost(int id, String title, String link, String description, LocalDateTime created) {
-        return new Post(id, title, link, description, created);
+    private Post createPost(Element row) {
+        Post post = null;
+        Element titleElement = row.select(".vacancy-card__title").first();
+        Element linkElement = titleElement.child(0);
+        Element date = row.select(".vacancy-card__date").first();
+        String vacancyName = titleElement.text();
+        String innerLink = String.format("%s%s", SOURCE_LINK, linkElement.attr("href"));
+        String exactDate = date.child(0).attr("datetime");
+        String description;
+        try {
+            description = this.retrieveDescription(innerLink);
+            post = new Post(postID++, vacancyName, innerLink, description, dateTimeParser.parse(exactDate));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return post;
     }
 }
