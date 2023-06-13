@@ -26,17 +26,26 @@ public class PsqlStore implements Store {
     }
 
     @Override
-    public void save(Post post) {
+    public Post save(Post post) {
         try (PreparedStatement statement = cnn.prepareStatement(
-                "INSERT INTO post (name, text, link, created) VALUES (?, ?, ?, ?) ON CONFLICT ON CONSTRAINT link DO NOTHING"
+                "INSERT INTO post (name, text, link, created) VALUES (?, ?, ?, ?) "
+                        + "ON CONFLICT ON CONSTRAINT post_link_key DO NOTHING",
+                Statement.RETURN_GENERATED_KEYS
         )) {
             statement.setString(1, post.getTitle());
             statement.setString(2, post.getDescription());
             statement.setString(3, post.getLink());
             statement.setTimestamp(4, Timestamp.valueOf(post.getCreated()));
+            statement.execute();
+            try (ResultSet generatedKeys = statement.getGeneratedKeys()) {
+                if (generatedKeys.next()) {
+                    post.setId(generatedKeys.getInt(1));
+                }
+            }
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            e.printStackTrace();
         }
+        return post;
     }
 
     @Override
