@@ -71,7 +71,7 @@ public class PsqlStore implements Store {
 
     @Override
     public Post findBy(int id) {
-        Post rsl = null;
+        Post rsl = new Post();
         try (PreparedStatement statement = cnn.prepareStatement("SELECT * FROM post WHERE id = ?")) {
             statement.setInt(1, id);
             try (ResultSet set = statement.executeQuery()) {
@@ -106,10 +106,12 @@ public class PsqlStore implements Store {
             for (Post post : all) {
                 System.out.println(post);
             }
-        } catch (IOException e) {
-            e.printStackTrace();
+            System.out.println(psqlStore.findBy(1));
+            psqlStore.close();
         } catch (SQLException e) {
             throw new RuntimeException(e);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 }
