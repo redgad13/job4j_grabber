@@ -1,9 +1,6 @@
 package ru.job4j.grabber;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.sql.*;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -92,26 +89,5 @@ public class PsqlStore implements Store {
     @Override
     public void close() throws Exception {
         cnn.close();
-    }
-
-    public static void main(String[] args) {
-        try (InputStream in = PsqlStore.class.getClassLoader().getResourceAsStream("psqlstore.properties")) {
-            Properties config = new Properties();
-            config.load(in);
-            PsqlStore psqlStore = new PsqlStore(config);
-            psqlStore.save(new Post(1, "first", "first link", "first desc", LocalDateTime.now()));
-            psqlStore.save(new Post(2, "second", "second link", "second desc", LocalDateTime.now()));
-            psqlStore.save(new Post(3, "third", "third link", "third desc", LocalDateTime.now()));
-            List<Post> all = psqlStore.getAll();
-            for (Post post : all) {
-                System.out.println(post);
-            }
-            System.out.println(psqlStore.findBy(1));
-            psqlStore.close();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 }
