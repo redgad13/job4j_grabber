@@ -5,6 +5,7 @@ import org.quartz.impl.StdSchedulerFactory;
 import ru.job4j.grabber.utils.HabrCareerDateTimeParser;
 
 import java.io.*;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
@@ -46,18 +47,24 @@ public class Grabber implements Grab {
     public static class GrabJob implements Job {
         @Override
         public void execute(JobExecutionContext context) {
+            String srcLink = "https://career.habr.com";
+            String pgLink = String.format("%s/vacancies/java_developer", srcLink);
+            StringBuilder builder = new StringBuilder(pgLink);
             JobDataMap map = context.getJobDetail().getJobDataMap();
             Store store = (Store) map.get("store");
             Parse parse = (Parse) map.get("parse");
             try {
-                List<Post> posts = parse.list(String.format("%s/vacancies/java_developer", "https://career.habr.com"));
+                List<Post> posts = new ArrayList<>();
+                for (int i = 2; i < 7; i++) {
+                    posts = parse.list(String.valueOf(builder));
+                    builder.append("?page=").append(i);
+                }
                 for (Post post : posts) {
                     store.save(post);
                 }
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
-
         }
     }
 
