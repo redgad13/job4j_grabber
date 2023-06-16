@@ -46,9 +46,10 @@ public class Grabber implements Grab {
     }
 
     @Override
-    public void init() throws SchedulerException {
+    public void init() {
 
     }
+
     public void web(Store store) {
         new Thread(() -> {
             try (ServerSocket server = new ServerSocket(Integer.parseInt(cfg.getProperty("port")))) {
@@ -69,7 +70,6 @@ public class Grabber implements Grab {
             }
         }).start();
     }
-
 
     public static class GrabJob implements Job {
         @Override
