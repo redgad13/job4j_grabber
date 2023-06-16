@@ -54,8 +54,8 @@ public class PsqlStore implements Store {
                     posts.add(new Post(
                             set.getInt("id"),
                             set.getString("name"),
-                            set.getString("text"),
                             set.getString("link"),
+                            set.getString("text"),
                             set.getTimestamp("created").toLocalDateTime()
                     ));
                 }
